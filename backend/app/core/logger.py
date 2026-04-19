@@ -1,15 +1,17 @@
+import logging
 import os
 from datetime import datetime
-import logging
 
-DIR_LOG = "runtime_logs"
-os.makedirs(DIR_LOG, exist_ok=True)
+# Ensure runtime_log folder exists
+LOG_DIR = "runtime_log"
+os.makedirs(LOG_DIR, exist_ok=True)
 
-today_date = datetime.utcnow().strftime("%Y-%M-%d")
-log_file_path = os.path.join(DIR_LOG, today_date)
+# Log filename with date
+today_str = datetime.utcnow().strftime("%Y-%m-%d")
+log_file_path = os.path.join(LOG_DIR, f"{today_str}.log")
 
 # Create logger
-logger = logging.getLogger("msgclickon")
+logger = logging.getLogger("altitude_trust_bank")
 logger.setLevel(logging.INFO)
 
 # Prevent duplicate handlers on reload
@@ -31,4 +33,3 @@ def log_info(module_path: str, message: str):
 
 def log_error(module_path: str, message: str):
     logger.error(f"{module_path} | {message}")
-    
