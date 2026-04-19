@@ -1,0 +1,237 @@
+Phase 1 — Birthday Automation Module (MVP)
+
+Focus ONLY on automatic birthday messages.
+
+The system should:
+
+Users register and login
+Users upload contacts with birthdays
+Users create birthday message templates
+System checks birthdays daily
+Messages are sent automatically
+Message delivery logs are stored
+
+Architecture:
+
+React Frontend
+      │
+      ▼
+FastAPI Backend
+      │
+      ├── PostgreSQL
+      ├── Redis Queue
+      │
+      ▼
+Go Agent
+      │
+      ▼
+Email / WhatsApp / SMS APIs
+Step 1 — Minimum Database Tables
+
+You only need 6 tables to start.
+
+users
+
+id
+name
+email
+password_hash
+created_at
+
+contacts
+
+id
+user_id
+first_name
+last_name
+phone
+email
+birthday
+created_at
+
+Important index:
+
+INDEX(birthday)
+
+This allows fast birthday lookup.
+
+templates
+
+id
+user_id
+name
+channel
+message
+created_at
+
+Example message:
+
+Happy Birthday {{name}} 🎉
+Wishing you a wonderful year ahead.
+
+birthday_campaigns
+
+id
+user_id
+template_id
+send_time
+channel
+active
+created_at
+
+Example:
+
+Send at 08:00
+Channel: WhatsApp
+
+scheduled_messages
+
+id
+contact_id
+campaign_id
+channel
+message
+phone
+scheduled_time
+status
+created_at
+
+status:
+
+pending
+queued
+sent
+failed
+
+message_logs
+
+id
+scheduled_message_id
+status
+response
+sent_at
+
+Step 2 — FastAPI Scheduler
+
+Your FastAPI backend runs a job every minute.
+
+Example logic:
+
+Check contacts where birthday = today
+Generate scheduled messages
+Push to Redis
+
+Example SQL:
+
+SELECT *
+FROM contacts
+WHERE EXTRACT(MONTH FROM birthday) = EXTRACT(MONTH FROM NOW())
+AND EXTRACT(DAY FROM birthday) = EXTRACT(DAY FROM NOW());
+
+Step 3 — Push Message Job to Redis
+
+FastAPI pushes a job:
+
+message_queue
+
+Example job:
+
+{
+ "job_id": "239383",
+ "channel": "whatsapp",
+ "phone": "+234801234567",
+ "message": "Happy birthday John 🎉"
+}
+Step 4 — Go Agent Worker
+
+Your Go agent listens to Redis.
+
+Flow:
+
+Pop job from Redis
+Send message
+Update backend
+
+Agent loop:
+
+Redis queue
+   ↓
+Agent reads job
+   ↓
+Send message
+   ↓
+POST result to FastAPI
+
+Step 5 — React Frontend (Birthday Module)
+
+Pages you need first:
+
+Login
+/login
+Dashboard
+
+Shows:
+
+Messages Sent Today
+Contacts with Birthday Today
+Total Contacts
+Contacts Page
+
+Users can:
+
+Add contact
+Upload CSV
+Edit contact
+
+Columns:
+
+Name
+Phone
+Email
+Birthday
+Birthday Settings
+
+User configures:
+
+Template
+Send Time
+Channel
+Enable / Disable
+Message Logs
+
+Users see:
+
+Contact
+Message
+Channel
+Status
+Sent Time
+Step 6 — Personalization Engine
+
+Your system should replace variables.
+
+Example template:
+
+Happy Birthday {{name}} 🎉
+
+Backend replaces:
+
+{{name}}
+
+with
+
+John
+Step 7 — Social Media Birthday Flyer (Optional Later)
+
+Later you can add:
+
+Generate birthday flyer
+Post to Facebook
+Post to Instagram
+
+Flow:
+
+Birthday detected
+Generate image
+Upload to storage
+Agent posts to social media
