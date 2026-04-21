@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.core.db import test_db_connection
 from app.core.logger import log_info, log_error
+from app.api import auth_route
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,3 +24,21 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+   allow_headers=[
+    "Content-Type",
+    "Authorization",
+    "Accept",
+    "X-Requested-With",
+    "X-CSRF-Token",
+    "X-API-Key"
+]
+    
+)
+
+app.include_router(auth_route.router)

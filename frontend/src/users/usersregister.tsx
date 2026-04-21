@@ -1,9 +1,13 @@
-import { useState, type ChangeEvent } from "react"
+import React, { useState, FormEvent, type ChangeEvent } from "react"
+ 
 
 export default function UsersRegister(){
     const [showpass, setShowpass] = useState<string>("Show")
     const [matchpass, setMatchpass] = useState<string | boolean>(false)
     const [password, setPassword] = useState<string>("")
+    const [fullname, setFullname] = useState<string>("")
+    const [email, setEmail] = useState<string>("")
+    const[ischecked, setIsChecked] = useState<boolean>(false)
 
     function funPass(){
         setShowpass(prev => prev === "Show" ? "Hide" : "Show")
@@ -16,6 +20,34 @@ export default function UsersRegister(){
             setMatchpass("Passwords matched")
         }
     }
+
+    function handleCheck(e:ChangeEvent<HTMLInputElement>){
+        setIsChecked(e.target.checked)
+    }
+    
+    
+  const submitHandler: React.FormEventHandler<HTMLFormElement> = async (e) => {
+  e.preventDefault();
+     const payload = {
+        fullname: fullname,
+        password: password,
+        email:email,
+        agreement:ischecked
+     }
+     console.log(payload)
+  try {
+ const res = await fetch("http://localhost:8000/api/v1/user/register", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(payload),
+});
+    console.log(await res.json());
+  } catch (err) {
+    console.error(err);
+  }
+};
 
     return(
         <div className="flex justify-center items-center px-4 bg-[var(--bg-color)] min-h-screen pb-[100px]">
@@ -57,23 +89,21 @@ export default function UsersRegister(){
 
                 {/* FORM */}
                 <div className="mt-5 sm:mt-6">
-                    <form className="space-y-4">
+                    <form className="space-y-4" onSubmit={submitHandler}>
 
                         {/* NAME FIELDS (STACK ON MOBILE) */}
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="w-full">
-                                <label className="text-sm font-medium">First name</label>
-                                <input 
-                                    type="text"
-                                    className="w-full bg-[var(--bg-color)] border border-gray-300 rounded-md mt-1 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
+                             
 
                             <div className="w-full">
-                                <label className="text-sm font-medium">Last name</label>
+                                <label className="text-sm font-medium">Fullname</label>
                                 <input 
                                     type="text"
                                     className="w-full bg-[var(--bg-color)] border border-gray-300 rounded-md mt-1 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={fullname}
+                                    onChange={(event:ChangeEvent<HTMLInputElement>) => setFullname(event.target.value)}
+                                    name="fullname"
+
                                 />
                             </div>
                         </div>
@@ -84,6 +114,8 @@ export default function UsersRegister(){
                             <input 
                                 type="email"
                                 className="w-full bg-[var(--bg-color)] border border-gray-300 rounded-md mt-1 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                 onChange={(event:ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+                                 name="email"
                             />
                         </div>
 
@@ -97,6 +129,7 @@ export default function UsersRegister(){
                                     value={password}
                                     onChange={(event:ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
                                     className="w-full  outline-none bg-[var(--bg-color)]"
+                                    name="password"
                                 />
 
                                 <button 
@@ -128,11 +161,19 @@ export default function UsersRegister(){
                                 </p>
                             )}
                         </div>
+                        <div className="flex gap-5">
+                            <div>
+                                <input type="checkbox" name="checkbox" id="checkbox" onChange={handleCheck} checked={ischecked}/>
+                            </div>
+                            <div>
+                                <p>I agree to our <span className="text-[var(--primary-color)] ">Terms of service</span> and <span className="text-[var(--primary-color)] ">Privacy policy</span></p>
+                            </div>
+                        </div>
 
                         {/* SUBMIT */}
                         <button 
                             type="submit"
-                            className="w-full bg-[var(--primary-color)] text-white py-2 rounded-md mt-4 hover:bg-orange-700 transition font-medium"
+                            className="w-full bg-[var(--primary-color)] text-white py-2 rounded-md mt-4 cursor-pointer hover:bg-orange-700 transition font-medium "
                         >
                             Create Account
                         </button>
