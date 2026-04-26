@@ -1,4 +1,5 @@
 import React, { useState, FormEvent, type ChangeEvent } from "react"
+import { useNavigate } from "react-router-dom"
  
 
 export default function UsersRegister(){
@@ -8,6 +9,8 @@ export default function UsersRegister(){
     const [fullname, setFullname] = useState<string>("")
     const [email, setEmail] = useState<string>("")
     const[ischecked, setIsChecked] = useState<boolean>(false)
+    const [userMsg, setIsUserMsg] = useState<string>("")
+    const navigate = useNavigate()
 
     function funPass(){
         setShowpass(prev => prev === "Show" ? "Hide" : "Show")
@@ -16,6 +19,7 @@ export default function UsersRegister(){
     function checkPass(e:any){
         if(e !== password){
             setMatchpass("Passwords do not match")
+
         }else{
             setMatchpass("Passwords matched")
         }
@@ -24,17 +28,38 @@ export default function UsersRegister(){
     function handleCheck(e:ChangeEvent<HTMLInputElement>){
         setIsChecked(e.target.checked)
     }
+
+    
     
     
   const submitHandler: React.FormEventHandler<HTMLFormElement> = async (e) => {
   e.preventDefault();
+
+if(fullname.length< 4 || fullname===" "){
+       return setIsUserMsg("Fullname must have at least 4 Characters")
+    }
+if(email.length< 6 || email===" "){
+       return setIsUserMsg("Fullname must have at least 4 Characters")
+    }
+if(password.length< 6 || password===" "){
+       return setIsUserMsg("Fullname must have at least 4 Characters")
+    }
+  //checking for the firstname
+    
      const payload = {
         fullname: fullname,
         password: password,
         email:email,
         agreement:ischecked
      }
-     console.log(payload)
+      
+
+
+
+
+
+
+
   try {
  const res = await fetch("http://localhost:8000/api/v1/user/register", {
   method: "POST",
@@ -43,18 +68,37 @@ export default function UsersRegister(){
   },
   body: JSON.stringify(payload),
 });
-    console.log(await res.json());
+ 
+const data = await res.json(); // ✅ only once
+
+
+  if (!res.ok) {
+    return setIsUserMsg(data.detail || "Something went wrong");
+  }
+
+  navigate('/email-verification')
+ 
+ 
+  
   } catch (err) {
-    console.error(err);
+    console.error("err",err);
   }
 };
 
     return(
         <div className="flex justify-center items-center px-4 bg-[var(--bg-color)] min-h-screen pb-[100px]">
+        
             
             {/* CONTAINER */}
             <div className="bg-[var(--secondary-color)] p-6 sm:p-8 md:p-10 border border-gray-200 w-full max-w-md md:max-w-lg rounded-2xl shadow-lg">
-                
+               {userMsg && (
+  <div className="flex justify-between gap-1 fixed top-5 right-3 z-50 max-w-[350px] 
+    bg-red-100  text-sm px-4 py-2 rounded-lg shadow-lg
+    transform translate-x-0">
+    <p className="text-red-700"> {userMsg}</p>
+    <p className="cursor-pointer" onClick={()=>setIsUserMsg("")}>ⓧ</p>
+  </div>
+)}
                 {/* HEADER */}
                 <div>
                     <h3 className="text-[var(--primary-color)] font-semibold text-xs sm:text-sm tracking-wide">
@@ -103,6 +147,7 @@ export default function UsersRegister(){
                                     value={fullname}
                                     onChange={(event:ChangeEvent<HTMLInputElement>) => setFullname(event.target.value)}
                                     name="fullname"
+                                    placeholder="James Andrew"
 
                                 />
                             </div>
@@ -116,6 +161,7 @@ export default function UsersRegister(){
                                 className="w-full bg-[var(--bg-color)] border border-gray-300 rounded-md mt-1 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                  onChange={(event:ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
                                  name="email"
+                                 placeholder="you@example.com"
                             />
                         </div>
 
@@ -130,6 +176,7 @@ export default function UsersRegister(){
                                     onChange={(event:ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
                                     className="w-full  outline-none bg-[var(--bg-color)]"
                                     name="password"
+                                    placeholder="Min. 8 Characters"
                                 />
 
                                 <button 
@@ -149,6 +196,7 @@ export default function UsersRegister(){
                                 type="password"
                                 onChange={(event:ChangeEvent<HTMLInputElement>) => checkPass(event.target.value)}
                                 className="w-full bg-[var(--bg-color)] border border-gray-300 rounded-md mt-1 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Re-enter your Password"
                             />
 
                             {matchpass && (

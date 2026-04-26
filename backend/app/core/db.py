@@ -27,12 +27,12 @@ def test_db_connection():
         info_message = "Database connection successful."
         
         logger.log_info(module_path, info_message)
-        print(f"✅ {info_message}")
+         
         return True
 
     except Exception as e:
         error_message = f"Database Connection failed: {str(e)}"
         
         logger.log_info(module_path, error_message)
-        print(error_message)
+        
         return False

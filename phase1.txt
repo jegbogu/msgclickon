@@ -235,3 +235,35 @@ Birthday detected
 Generate image
 Upload to storage
 Agent posts to social media
+
+-- Enable UUID generation (choose one depending on your setup)
+
+-- Option 1 (recommended for modern Postgres)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Option 2 (older setups)
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+
+-- Create table
+CREATE TABLE email_verifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- or uuid_generate_v4()
+
+    user_id UUID NOT NULL,
+
+    code_hash TEXT NOT NULL,
+
+    expires_at TIMESTAMP NOT NULL,
+
+    attempts INTEGER DEFAULT 0,
+
+    max_attempts INTEGER DEFAULT 5,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- Foreign key constraint
+    CONSTRAINT fk_user
+        FOREIGN KEY(user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
