@@ -1,11 +1,21 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+type CheckYourEmailProps = {
+  email:string;
+}
 
-export default function CheckYourEmail() {
+export default function CheckYourEmail({email}:CheckYourEmailProps) {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const inputs = useRef<HTMLInputElement[]>([]);
   const[userMsg, setIsUserMsg] = useState<string>("")
+ const [loading, setLoading] = useState<boolean>(false)
+
   const navigate = useNavigate()
+  const firstpartemail = email.slice(0,2)
+  const last = email.slice(email.indexOf("@"),100)
+  const renderPartEmail = `${firstpartemail}****${last}`
+
+  
 
   const handleChange = (value: string, index: number) => {
     if (!/^\d?$/.test(value)) return;
@@ -35,22 +45,27 @@ export default function CheckYourEmail() {
     if(code.length< 6|| code===" "){
        return setIsUserMsg("Wrong Code")
     }
- 
+    setLoading(true)
+    const payload = {
+      code:code,
+      email:email
+    }
 
     // TODO: call your FastAPI endpoint
     // fetch("/verify-otp", { method: "POST", body: JSON.stringify({ code }) })
-const res = await fetch("http://localhost:8000/api/v1/user/register", {
+const res = await fetch("http://localhost:8000/api/v1/user/storing_otp", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
   },
-  body: JSON.stringify(code),
+  body: JSON.stringify(payload),
 });
  
 const data = await res.json(); // ✅ only once
 
-
+  
   if (!res.ok) {
+      setLoading(false)
     return setIsUserMsg(data.detail || "Something went wrong");
   }
 
@@ -95,7 +110,7 @@ const data = await res.json(); // ✅ only once
         <p className="text-gray-500 text-sm mb-6">
           We sent a 6-digit verification code to <br />
           <span className="font-medium text-black">
-            ja***@gmail.com
+             {renderPartEmail}
           </span>
           <br />
           Enter it below to continue
@@ -119,13 +134,16 @@ const data = await res.json(); // ✅ only once
             />
           ))}
         </div>
-
+           {loading?
+                        <div className="flex justify-center items-center">
+                             <img src="/svg-spinners--pulse-multiple.svg" alt="spinner" className="cursor-not-allowed " width={70}/>
+                        </div>:
         <button
           onClick={handleSubmit}
           className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition"
         >
           Verify & Continue
-        </button>
+        </button>}
 
         <p className="text-sm text-gray-500 mt-4">
           Didn’t receive it?{" "}

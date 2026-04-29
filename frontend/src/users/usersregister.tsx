@@ -10,6 +10,7 @@ export default function UsersRegister(){
     const [email, setEmail] = useState<string>("")
     const[ischecked, setIsChecked] = useState<boolean>(false)
     const [userMsg, setIsUserMsg] = useState<string>("")
+    const [loading, setLoading] = useState<boolean>(false)
     const navigate = useNavigate()
 
     function funPass(){
@@ -27,6 +28,7 @@ export default function UsersRegister(){
 
     function handleCheck(e:ChangeEvent<HTMLInputElement>){
         setIsChecked(e.target.checked)
+        console.log(ischecked)
     }
 
     
@@ -34,6 +36,7 @@ export default function UsersRegister(){
     
   const submitHandler: React.FormEventHandler<HTMLFormElement> = async (e) => {
   e.preventDefault();
+ 
 
 if(fullname.length< 4 || fullname===" "){
        return setIsUserMsg("Fullname must have at least 4 Characters")
@@ -44,8 +47,9 @@ if(email.length< 6 || email===" "){
 if(password.length< 6 || password===" "){
        return setIsUserMsg("Fullname must have at least 4 Characters")
     }
+ 
   //checking for the firstname
-    
+    setLoading(true)
      const payload = {
         fullname: fullname,
         password: password,
@@ -70,13 +74,13 @@ if(password.length< 6 || password===" "){
 });
  
 const data = await res.json(); // ✅ only once
-
-
+ 
   if (!res.ok) {
+    setLoading(false)
     return setIsUserMsg(data.detail || "Something went wrong");
   }
-
-  navigate('/email-verification')
+ 
+  navigate('/email-verification',{state:{email:data.email}})
  
  
   
@@ -219,12 +223,17 @@ const data = await res.json(); // ✅ only once
                         </div>
 
                         {/* SUBMIT */}
-                        <button 
+                        {loading?
+                        <div className="flex justify-center items-center">
+                             <img src="/svg-spinners--pulse-multiple.svg" alt="spinner" className="cursor-not-allowed " width={70}/>
+                        </div>
+                       
+                        :<button 
                             type="submit"
                             className="w-full bg-[var(--primary-color)] text-white py-2 rounded-md mt-4 cursor-pointer hover:bg-orange-700 transition font-medium "
                         >
                             Create Account
-                        </button>
+                        </button>}
 
                     </form>
                 </div>
