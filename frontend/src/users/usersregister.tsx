@@ -1,4 +1,4 @@
-import React, { useState, FormEvent, type ChangeEvent } from "react"
+import  { useState, type FormEvent, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom"
  
 
@@ -34,26 +34,28 @@ export default function UsersRegister(){
     
     
     
-  const submitHandler: React.FormEventHandler<HTMLFormElement> = async (e) => {
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
   e.preventDefault();
  
+     
+if (fullname.trim().length < 4) {
+    return setIsUserMsg("Fullname must have at least 4 characters");
+}
 
-if(fullname.length< 4 || fullname===" "){
-       return setIsUserMsg("Fullname must have at least 4 Characters")
-    }
-if(email.length< 6 || email===" "){
-       return setIsUserMsg("Fullname must have at least 4 Characters")
-    }
-if(password.length< 6 || password===" "){
-       return setIsUserMsg("Fullname must have at least 4 Characters")
-    }
+if (email.trim().length < 6) {
+    return setIsUserMsg("Enter a valid email");
+}
+
+if (password.trim().length < 6) {
+    return setIsUserMsg("Password must be at least 6 characters");
+}
  
   //checking for the firstname
     setLoading(true)
      const payload = {
-        fullname: fullname,
-        password: password,
-        email:email,
+        fullname: fullname.trim(),
+        password: password.trim(),
+        email:email.toLowerCase().trim(),
         agreement:ischecked
      }
       
@@ -152,6 +154,7 @@ const data = await res.json(); // ✅ only once
                                     onChange={(event:ChangeEvent<HTMLInputElement>) => setFullname(event.target.value)}
                                     name="fullname"
                                     placeholder="James Andrew"
+                                    
 
                                 />
                             </div>
@@ -166,6 +169,7 @@ const data = await res.json(); // ✅ only once
                                  onChange={(event:ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
                                  name="email"
                                  placeholder="you@example.com"
+                                 value={email}
                             />
                         </div>
 
