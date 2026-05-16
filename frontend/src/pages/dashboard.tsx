@@ -1,11 +1,17 @@
 import Userdashboardnav from "../users/userdashboardnav";
-import { Usersalutation } from "../users/usersalutation";
+import UserSalutation from "../users/usersalutation";
+import ContactHeader from "../users/contactheader";
+import StatsSection from "../users/StatsSection";
+import FeaturesSection from "../users/FeaturesSection";
 
 export default function Dashboard() {
     return(
-        <div>
+        <div className="p-5">
              <Userdashboardnav/>
-             <Usersalutation/>
+             <UserSalutation/>
+             <ContactHeader totalContacts={4387} />
+             <StatsSection />
+             <FeaturesSection />
         </div>
     )
 }

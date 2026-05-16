@@ -42,29 +42,27 @@ def login_user(db: Session, payload, response: Response):
         if not verify_password:
             return {"success": False, "message": "Email or Password is not correct"}
 
-        # Generate JWT token
         access_token = create_access_token(
             data={
-                "email": existing_user.email, 
+                "email": existing_user.email,
                 "id": str(existing_user.id),
                 "fullname": existing_user.fullname,
-                
-                }
+            }
         )
 
+        # Cookie settings
         response.set_cookie(
             key="access_token",
             value=access_token,
-            httponly=True,      # Not accessible from JS
-            secure=False,       # True in production (HTTPS)
-            samesite="lax",     # "none" in production if frontend is separate domain
+            httponly=True,
+            secure=False,     # True in production
+            samesite="lax",   # "none" in production if frontend is separate domain
             max_age=60 * 60
         )
 
         return {
             "success": True,
             "message": "Login successful",
-            "token_type": "bearer",
             "user": {
                 "id": existing_user.id,
                 "email": existing_user.email,
@@ -85,8 +83,17 @@ def get_current_user(request: Request):
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print("payload", payload)
         return payload
-
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+def logout_user(response: Response):
+    # Must match the SAME settings used when creating cookie
+    response.delete_cookie(
+        key="access_token",
+        secure=False,
+        samesite="lax"
+    )
+
+    return {"success": True, "message": "Logged out"}

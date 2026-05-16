@@ -10,7 +10,9 @@ import ProtectedRoute from "./ProtectedRoute";
 function AppRoutes() {
   const { user, loading } = useAuth();
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return  <div className="flex justify-center items-center">
+                             <img src="/svg-spinners--pulse-multiple.svg" alt="spinner" className="cursor-not-allowed " width={70}/>
+                        </div>;
 
   return (
     <Routes>
