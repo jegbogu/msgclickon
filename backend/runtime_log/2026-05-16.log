@@ -34,3 +34,6 @@
 2026-05-16 18:19:44 | INFO | altitude_trust_bank | Database Connection | Database connection successful.
 2026-05-16 18:19:44 | INFO | altitude_trust_bank | app.main | Database connection succesaful.
 2026-05-16 18:19:58 | INFO | altitude_trust_bank | app.main | Shutting down MsgClickOn...
+2026-05-16 18:19:59 | INFO | altitude_trust_bank | app.main | Msgclickon application 
+2026-05-16 18:20:00 | INFO | altitude_trust_bank | Database Connection | Database connection successful.
+2026-05-16 18:20:00 | INFO | altitude_trust_bank | app.main | Database connection succesaful.

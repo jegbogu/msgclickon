@@ -48,6 +48,7 @@ phone
 email
 birthday
 created_at
+group
 
 Important index:
 
@@ -264,6 +265,53 @@ CREATE TABLE email_verifications (
     -- Foreign key constraint
     CONSTRAINT fk_user
         FOREIGN KEY(user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE contact (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    phone VARCHAR(20),
+    email VARCHAR(255),
+    birthday DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    group_name VARCHAR(100)
+);
+
+ 
+
+
+
+-- Drop table if it exists
+DROP TABLE IF EXISTS contact CASCADE;
+
+
+
+-- Create contact table
+CREATE TABLE contact (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id UUID NOT NULL,
+
+    first_name VARCHAR(100) NOT NULL,
+
+    last_name VARCHAR(100) NOT NULL,
+
+    phone VARCHAR(20) UNIQUE,
+
+    email VARCHAR(255) UNIQUE,
+
+    birthday DATE,
+
+    group_name VARCHAR(100),
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_contact_user
+        FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
 );

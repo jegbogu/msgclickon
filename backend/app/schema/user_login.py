@@ -6,7 +6,7 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=6)
     
 
-    @field_validator( "email", "password")
+    @field_validator( "email", "password",  mode="before")
     @classmethod
     def trim_strings(cls, v: str):
         return v.strip()

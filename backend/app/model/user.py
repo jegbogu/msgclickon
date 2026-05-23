@@ -1,6 +1,7 @@
 from app.core.db import Base
 from sqlalchemy import Column, String, Boolean, DateTime
-from datetime import datetime
+from sqlalchemy.sql import func
+ 
 import uuid
 
 class User(Base):
@@ -12,4 +13,8 @@ class User(Base):
     password_hash = Column(String(225), nullable=False)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
-    created_at = Column(DateTime, default =datetime.utcnow)
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )

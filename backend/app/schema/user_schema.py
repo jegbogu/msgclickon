@@ -6,7 +6,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=6)
     agreement: bool
 
-    @field_validator("fullname", "email", "password")
+    @field_validator("fullname", "email", "password",  mode="before")
     @classmethod
     def trim_strings(cls, v: str):
         return v.strip()

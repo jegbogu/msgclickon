@@ -43,6 +43,7 @@ def login(payload: LoginRequest, response: Response, db: Session = Depends(get_d
     }
 
 
+
 @router.post("/storing_otp")
 def storing_otp(payload: VerifyOTPRequest, db: Session = Depends(get_db)):
     result = verify_otp(db, payload)
@@ -67,3 +68,4 @@ def me(user=Depends(get_current_user)):
 @router.post("/logout")
 def logout(response: Response):
     return logout_user(response)
+
