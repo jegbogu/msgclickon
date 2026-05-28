@@ -21,3 +21,59 @@ def addcontact(payload: AddcontactRequest, db: Session = Depends(get_db)):
         "status": "success",
         "data": result
     }
+    
+@router.post("/contacts/import")
+async def import_contacts(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    if not file.filename.endswith(".csv"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only CSV files are allowed"
+        )
+
+    content = await file.read()
+
+    try:
+        df = pd.read_csv(
+            StringIO(content.decode("utf-8"))
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid CSV file"
+        )
+
+    headers = set(df.columns)
+
+    if headers != EXPECTED_HEADERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"CSV must contain exactly: {list(EXPECTED_HEADERS)}"
+        )
+
+    inserted = 0
+
+    for _, row in df.iterrows():
+
+        contact = Contact(
+            first_name=str(row["first_name"]).strip(),
+            last_name=str(row["last_name"]).strip(),
+            email=str(row["email"]).strip(),
+            phone=str(row["phone"]).strip(),
+            birthday=None
+            if pd.isna(row["birthday"])
+            else str(row["birthday"]),
+            group_name=str(row["group"]).strip()
+        )
+
+        db.add(contact)
+        inserted += 1
+
+    db.commit()
+
+    return {
+        "success": True,
+        "inserted": inserted
+    }
