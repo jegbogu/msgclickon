@@ -4,6 +4,7 @@ from app.core.db import test_db_connection
 from app.core.logger import log_info, log_error
 from app.api import auth_route
 from app.api import addcontact
+from app.api import usercontacts
 from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
@@ -44,3 +45,4 @@ app.add_middleware(
 
 app.include_router(auth_route.router)
 app.include_router(addcontact.router)
+app.include_router(usercontacts.router)

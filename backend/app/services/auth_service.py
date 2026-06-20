@@ -2,10 +2,10 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from app.model.user import User
 from app.services.registration_otp import generate_and_send_otp
+ 
 
 
-
-def register_user(db:Session, payload):
+def register_user(db:Session, payload ):
     try:
         
         existing_user = db.query(User).filter(User.email== payload.email).first()

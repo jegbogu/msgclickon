@@ -18,8 +18,8 @@ router = APIRouter(
 
 
 @router.post("/register")
-def register(payload: RegisterRequest, response: Response, db: Session = Depends(get_db)):
-    result = register_user(db, payload, response)
+def register(payload: RegisterRequest, db: Session = Depends(get_db)):
+    result = register_user(db, payload)
 
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["message"])

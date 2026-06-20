@@ -13,7 +13,7 @@ export default function UserSalutation() {
       : "Evening";
 
   return (
-    <div>
+    <div className="mt-[30px]">
       <p className="text-[var(--primary-color)] font-bold text-sm">
         WELCOME
       </p>

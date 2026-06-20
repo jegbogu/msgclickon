@@ -40,7 +40,7 @@ export default function AddContactModal({
       group_name: group,
     };
 
-    console.log(payload);
+ 
 
     try {
       const res = await fetch(

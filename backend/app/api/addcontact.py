@@ -1,9 +1,26 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
 from app.schema.addcontact import AddcontactRequest
 from app.services.addcontact_service import add_contact
 from app.core.db import get_db
+from app.model.addcontact_model import Contact   
 
+from fastapi import APIRouter, UploadFile, Form, File, HTTPException, Depends
+from sqlalchemy.orm import Session
+import pandas as pd
+from io import StringIO
+
+router = APIRouter(
+    prefix="/api/v1/user",
+    tags=["Add Contact"]
+)
+
+EXPECTED_HEADERS = {
+    "first_name",
+    "last_name",
+    "email",
+    "phone",
+    "birthday",
+    "group_name"   
+}
 router = APIRouter(
     prefix="/api/v1/user",
     tags=["Add Contact"]
@@ -11,7 +28,7 @@ router = APIRouter(
 
 @router.post("/addcontact")
 def addcontact(payload: AddcontactRequest, db: Session = Depends(get_db)):
-    print("router")
+   
     result = add_contact(db, payload)
 
     if not result["success"]:
@@ -25,25 +42,19 @@ def addcontact(payload: AddcontactRequest, db: Session = Depends(get_db)):
 @router.post("/contacts/import")
 async def import_contacts(
     file: UploadFile = File(...),
+    user_id: str = Form(...),
     db: Session = Depends(get_db)
 ):
     if not file.filename.endswith(".csv"):
-        raise HTTPException(
-            status_code=400,
-            detail="Only CSV files are allowed"
-        )
+        raise HTTPException(400, "Only CSV files are allowed")
 
     content = await file.read()
+    print("content", content)
 
     try:
-        df = pd.read_csv(
-            StringIO(content.decode("utf-8"))
-        )
+        df = pd.read_csv(StringIO(content.decode("utf-8")))
     except Exception:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid CSV file"
-        )
+        raise HTTPException(400, "Invalid CSV file")
 
     headers = set(df.columns)
 
@@ -54,26 +65,36 @@ async def import_contacts(
         )
 
     inserted = 0
+    errors = []
 
-    for _, row in df.iterrows():
+    for index, row in df.iterrows():
 
-        contact = Contact(
+        payload = Contact(
+            user_id=user_id,  
             first_name=str(row["first_name"]).strip(),
             last_name=str(row["last_name"]).strip(),
             email=str(row["email"]).strip(),
             phone=str(row["phone"]).strip(),
-            birthday=None
-            if pd.isna(row["birthday"])
-            else str(row["birthday"]),
-            group_name=str(row["group"]).strip()
+            birthday=None if pd.isna(row["birthday"]) else str(row["birthday"]),
+            group_name=str(row["group_name"]).strip()
         )
 
-        db.add(contact)
-        inserted += 1
+        result = add_contact(db, payload)
 
-    db.commit()
+        if result["success"]:
+            inserted += 1
+        else:
+            errors.append({
+                "row": index,
+                "email": row["email"],
+                "error": result["message"]
+            })
 
     return {
-        "success": True,
-        "inserted": inserted
+        "status": "success",
+        "inserted": inserted,
+        "failed": len(errors),
+        "errors": errors
     }
+
+    

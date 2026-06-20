@@ -1,5 +1,6 @@
 import AddContactModal from "./addcontactmodal";
 import { useRef, useState } from "react";
+import { useAuth } from "../AuthContext";
 
 type ContactHeaderProps = {
   totalContacts: number;
@@ -9,6 +10,7 @@ export default function ContactHeader({
   totalContacts,
 }: ContactHeaderProps) {
   const [open, setOpen] = useState(false);
+    const { user, refreshUser } = useAuth();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -16,45 +18,45 @@ export default function ContactHeader({
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
+const handleFileChange = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    if (!file) return;
+  const formData = new FormData();
 
-    const formData = new FormData();
-    formData.append("file", file);
+  formData.append("file", file);
 
-    try {
-      const response = await fetch(
-        `http://localhost:8000/api/v1/user/contacts/import`,
-        {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-        }
-      );
+  // ✅ attach user_id correctly
+  formData.append("user_id", user?.id || "");
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Upload failed");
+  try {
+    const response = await fetch(
+      "http://localhost:8000/api/v1/user/contacts/import",
+      {
+        method: "POST",
+        body: formData,  
+        credentials: "include",
       }
+    );
 
-      alert(
-        `${data.inserted || 0} contacts imported successfully`
-      );
+    const data = await response.json();
 
-      // Optional: refresh contacts list
-      window.location.reload();
-    } catch (error: any) {
-      alert(error.message || "Failed to upload contacts");
+    if (!response.ok) {
+      throw new Error(data.detail || "Upload failed");
     }
 
-    // Reset input so same file can be uploaded again
-    e.target.value = "";
-  };
+    await refreshUser();
+
+    alert(`${data.inserted || 0} contacts imported successfully`);
+    window.location.reload();
+  } catch (error: any) {
+    alert(error.message || "Failed to upload contacts");
+  }
+
+  e.target.value = "";
+};
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mt-5">
@@ -110,7 +112,7 @@ export default function ContactHeader({
         </button>
 
         <button className="px-5 py-2 rounded-xl bg-orange-500 text-white cursor-pointer hover:bg-orange-600 transition">
-          Manage contacts →
+          <a href="/Contactmanager">Manage contacts →</a> 
         </button>
       </div>
     </div>

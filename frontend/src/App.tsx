@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import EmailVerification from "./pages/email-verification";
+import Contactmanager from "./pages/contactmanager";
 import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import Login from "./pages/login";
@@ -25,6 +26,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute user={user}>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/Contactmanager"
+        element={
+          <ProtectedRoute user={user}>
+            <Contactmanager/>
           </ProtectedRoute>
         }
       />
