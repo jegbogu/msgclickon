@@ -8,6 +8,7 @@ export default function FeaturesSection() {
         icon="🎂"
         title="Auto birthday message"
         description="Set up automatic birthday messages via Email, WhatsApp, SMS, Slack or auto-post on social media. Full message builder included."
+        link= "/auto_birthday_message"
       />
 
       <FeatureCard
@@ -15,6 +16,7 @@ export default function FeaturesSection() {
         icon="💡"
         title="Inspiration series"
         description="Upload a CSV of daily messages and drip them automatically to your selected contact over days, weeks or months."
+         link= "/auto_birthday_message"
       />
 
       <FeatureCard
@@ -22,6 +24,7 @@ export default function FeaturesSection() {
         icon="⏰"
         title="Event reminder"
         description="Remind users about domain expiries, renewals, contracts or any event. Escalation follow-ups fire automatically if unread."
+         link= "/auto_birthday_message"
       />
 
       <FeatureCard
@@ -29,6 +32,7 @@ export default function FeaturesSection() {
         icon="📌"
         title="Personal reminder"
         description="Set reminders for yourself — learning goals, tasks, habits, prayer times. Each with its own schedule, channel and message."
+         link= "/auto_birthday_message"
         active
       />
     </div>

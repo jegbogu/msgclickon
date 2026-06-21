@@ -1,10 +1,12 @@
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type FeatureCardProps = {
   badge: string;
   icon: string;
   title: string;
   description: string;
+  link:string;
   active?: boolean;
 };
 
@@ -13,9 +15,11 @@ export default function FeatureCard({
   icon,
   title,
   description,
+  link,
   active = false,
 }: FeatureCardProps) {
   return (
+    <Link to={link} className="block">
     <div
       className={`rounded-2xl bg-white p-6 border transition-all duration-300 hover:shadow-md ${
         active
@@ -51,5 +55,6 @@ export default function FeatureCard({
         </p>
       </div>
     </div>
+    </Link>
   );
 }

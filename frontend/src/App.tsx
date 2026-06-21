@@ -7,6 +7,7 @@ import Login from "./pages/login";
 import Home from "./pages/home";
 import { AuthProvider, useAuth } from "./AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
+import Autobirthdaymessage from "./pages/auto_birthday_message";
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -34,6 +35,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute user={user}>
             <Contactmanager/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/auto_birthday_message"
+        element={
+          <ProtectedRoute user={user}>
+            <Autobirthdaymessage/>
           </ProtectedRoute>
         }
       />

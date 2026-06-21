@@ -1,6 +1,6 @@
 type StatsCardProps = {
   title: string;
-  value: string;
+  value: number | string;
   subtitle: string;
 };
 

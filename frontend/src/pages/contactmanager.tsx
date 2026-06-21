@@ -5,11 +5,17 @@ import UserDashboardNav from "../users/userdashboardnav";
 
 export default function Contactmanager(){
     return(
-        <div className="p-5 bg-[var(--bg-color)] min-h-screen">
+        <div >
             <UserDashboardNav/>
-            <Managecontactsheader/>
+        <div className="p-5 bg-[var(--bg-color)] min-h-screen">
+            
+            <Managecontactsheader pagename="Contact"
+            title="Contact manager"
+            description="All your contacts in one place - used across every campaign, reminder and message you set up."
+            />
             <Managecontactsbanner/>
             <Contactstable/>
+        </div>
         </div>
     )
 }

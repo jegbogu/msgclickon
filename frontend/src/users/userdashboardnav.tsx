@@ -50,7 +50,7 @@ export default function UserDashboardNav() {
   }, []);
 
   return (
-    <div className="flex justify-between items-center relative">
+ <div className="flex justify-between items-center relative bg-white p-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] sticky top-0 z-1000">
       {/* Logo */}
       <div>
         <img
