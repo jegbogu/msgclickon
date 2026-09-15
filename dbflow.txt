@@ -1,0 +1,55 @@
+┌──────────────────┐
+│      users       │
+│──────────────────│
+│ id               │
+│ fullname         │
+│ email            │
+│ password_hash    │
+└────────┬─────────┘
+         │
+         │
+         ├──────────────────────┐
+         │                      │
+         ▼                      ▼
+┌──────────────────┐    ┌──────────────────────┐
+│     contact      │    │    email_template    │
+│──────────────────│    │──────────────────────│
+│ id               │    │ id                   │
+│ user_id          │    │ user_id              │
+│ first_name       │    │ name                 │
+│ last_name        │    │ subject              │
+│ email            │    │ content              │
+│ phone            │    │ signature            │
+│ birthday         │    │ header_image_url     │
+│ group_name       │    │ footer_image_url     │
+└────────┬─────────┘    │ elements             │
+         │              └──────────┬───────────┘
+         │                         │
+         │                         │
+         │              ┌──────────▼───────────┐
+         └─────────────►│    email_campaign    │
+                        │───────────────────────│
+                        │ id                    │
+                        │ user_id               │
+                        │ template_id            │
+                        │ name                   │
+                        │ campaign_type         │
+                        │ subject               │
+                        │ content               │
+                        │ signature             │
+                        │ status                │
+                        │ send_time             │
+                        │ timezone              │
+                        │ days_before_birthday  │
+                        └──────────┬────────────┘
+                                   │
+                                   ▼
+                        ┌────────────────────────┐
+                        │ email_campaign_contact │
+                        │────────────────────────│
+                        │ campaign_id            │
+                        │ contact_id             │
+                        └────────────┬───────────┘
+                                     │
+                                     ▼
+                                  contact

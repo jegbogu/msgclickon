@@ -1,0 +1,6 @@
+PS C:\Users\Hp Elitebook\Documents\joseph\full_auto_msg_app\backup> $env:Path += ";C:\Program Files\PostgreSQL\18\bin"
+PS C:\Users\Hp Elitebook\Documents\joseph\full_auto_msg_app\backup> $env:PGPASSWORD_SRC = 'Edge123'
+PS C:\Users\Hp Elitebook\Documents\joseph\full_auto_msg_app\backup> $env:PGPASSWORD_TGT = 'Edge123'
+PS C:\Users\Hp Elitebook\Documents\joseph\full_auto_msg_app\backup>  .\Sync-EdgeDbWindow.ps1 -SrcHost 102.164.37.218 -SrcUser postgres `
+>> -TgtHost 102.164.38.172 -TgtUser postgres `
+>> -Window '2 days'

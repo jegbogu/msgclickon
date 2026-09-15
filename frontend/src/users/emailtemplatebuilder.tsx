@@ -16,6 +16,15 @@ import type { TemplateId } from "../component/email-templates/emailTemplates";
 type EmailTemplateBuilderProps = {
   templateContent: string;
   templateId: TemplateId;
+
+  onNext: (data: {
+    templateId: TemplateId;
+    content: string;
+    signature: string;
+    headerImageUrl: string | null;
+    footerImageUrl: string | null;
+    elements: EditorElement[];
+  }) => void;
 };
 
 type ElementType =
@@ -35,6 +44,7 @@ type EditorElement = {
 export default function EmailTemplateBuilder({
   templateContent,
   templateId,
+  onNext,
 }: EmailTemplateBuilderProps) {
   const [content, setContent] =
     useState(templateContent);
@@ -756,11 +766,28 @@ export default function EmailTemplateBuilder({
         />
 
         <button
-          type="button"
-          className="mt-5 rounded-md bg-[var(--primary-color)] px-5 py-2 text-white"
-        >
-          Next →
-        </button>
+  type="button"
+  onClick={() => {
+
+    onNext({
+      templateId,
+
+      content,
+
+      signature,
+
+      headerImageUrl: headerImage,
+
+      footerImageUrl: footerImage,
+
+      elements,
+    });
+
+  }}
+  className="mt-5 rounded-md bg-[var(--primary-color)] px-5 py-2 text-white"
+>
+  Next →
+</button>
 
       </div>
     </div>

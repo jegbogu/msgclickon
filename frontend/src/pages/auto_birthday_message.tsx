@@ -1,32 +1,10 @@
-import { useState } from "react";
-
 import Channelsheadersandnav from "../users/channelsheadersandnav";
-import Emailautobdm from "../users/emailautobdm";
-import EmailTemplateBuilder from "../users/emailtemplatebuilder";
 import Managecontactsheader from "../users/managecontactsheader";
 import UserDashboardNav from "../users/userdashboardnav";
 
-import {
-  emailTemplates,
-  type TemplateId,
-} from "../component/email-templates/emailTemplates";
+import AutoBirthdayMessage from "../users/AutoBirthdayMessage";
 
 export default function Autobirthdaymessage() {
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<TemplateId>("classic");
-
-  const [templateContent, setTemplateContent] = useState(
-    emailTemplates.classic.content
-  );
-
-  const handleUseTemplate = (templateId: TemplateId) => {
-    setSelectedTemplate(templateId);
-
-    setTemplateContent(
-      emailTemplates[templateId].content
-    );
-  };
-
   return (
     <div className="min-h-screen bg-[var(--bg-color)]">
       <UserDashboardNav />
@@ -41,18 +19,7 @@ export default function Autobirthdaymessage() {
         <Channelsheadersandnav />
 
         <div className="rounded-xl border border-gray-300 bg-white p-5">
-
-          {/* Template selection */}
-          <Emailautobdm
-            onUseTemplate={handleUseTemplate}
-          />
-
-          {/* Email builder */}
-          <EmailTemplateBuilder
-            templateContent={templateContent}
-            templateId={selectedTemplate}
-          />
-
+          <AutoBirthdayMessage />
         </div>
       </div>
     </div>
