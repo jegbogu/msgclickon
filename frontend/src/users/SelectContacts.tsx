@@ -264,20 +264,14 @@ export default function SelectContacts({
    * NEXT
    */
 
-  const handleNext = () => {
+   const handleNext = () => {
+  if (selectedIds.length === 0) {
+    window.alert("Please select at least one contact.");
+    return;
+  }
 
-    if (
-      selectedIds.length === 0
-    ) {
-      setError(
-        "Please select at least one contact."
-      );
-
-      return;
-    }
-
-    onNext(selectedIds);
-  };
+  onNext(selectedIds);
+};
 
 
   return (
@@ -354,15 +348,7 @@ export default function SelectContacts({
       </div>
 
 
-      {/* ERROR */}
-
-      {error && (
-
-        <div className="m-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-600">
-          {error}
-        </div>
-
-      )}
+       
 
 
       {/* TABLE */}

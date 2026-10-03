@@ -12,7 +12,7 @@ export default function Autobirthdaymessage() {
       <div className="p-5">
         <Managecontactsheader
           pagename="AUTO BIRTHDAY MESSAGE"
-          title="Set up birthday messages"
+          title="Set up a birthday campaign"
           description="Choose your channel - each has its own message builder and templates"
         />
 

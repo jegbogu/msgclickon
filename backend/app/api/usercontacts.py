@@ -32,7 +32,7 @@ def usercontacts(
     }
 
 
-# NEW — FOR SELECT CONTACTS / BIRTHDAY CAMPAIGNS
+ # FOR SELECT CONTACTS / BIRTHDAY CAMPAIGNS
 @router.get("/contacts")
 def get_user_contacts(
     user_id: str,

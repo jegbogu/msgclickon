@@ -5,8 +5,13 @@ from pydantic import BaseModel, Field
 
 
 class CreateEmailCampaignRequest(BaseModel):
-    user_id: str = Field(min_length=10)
-    name: str = Field(min_length=1, max_length=255)
+
+    user_id: str
+
+    name: str = Field(
+        min_length=1,
+        max_length=255,
+    )
 
     campaign_type: str = "birthday"
 
@@ -19,6 +24,8 @@ class CreateEmailCampaignRequest(BaseModel):
     header_image_url: Optional[str] = None
 
     footer_image_url: Optional[str] = None
+    
+    status: Optional[str] = None
 
     send_time: Optional[time] = None
 
