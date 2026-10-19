@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 
-from app.model.email_campaign import EmailCampaign
+from app.model.campaigns_model import Email_campaign
 from app.model.email_campaign_contact import EmailCampaignContact
 from app.model.addcontact_model import Contact
 
@@ -79,9 +79,7 @@ async def upload_campaign_image(
         # Create upload directory
         # ----------------------------------------------------
 
-        upload_dir = Path(
-            "uploads/email_campaigns"
-        )
+        upload_dir = Path("uploads/email_campaigns")
 
         upload_dir.mkdir(
             parents=True,
@@ -92,37 +90,24 @@ async def upload_campaign_image(
         # Generate unique filename
         # ----------------------------------------------------
 
-        extension = allowed_types[
-            file.content_type
-        ]
+        extension = allowed_types[file.content_type]
 
-        filename = (
-            f"{uuid.uuid4()}{extension}"
-        )
+        filename = f"{uuid.uuid4()}{extension}"
 
-        file_path = (
-            upload_dir / filename
-        )
+        file_path = upload_dir / filename
 
         # ----------------------------------------------------
         # Save file
         # ----------------------------------------------------
 
-        with open(
-            file_path,
-            "wb",
-        ) as buffer:
-
+        with open(file_path, "wb") as buffer:
             buffer.write(contents)
 
         # ----------------------------------------------------
         # Generate public URL
         # ----------------------------------------------------
 
-        base_url = (
-            str(request.base_url)
-            .rstrip("/")
-        )
+        base_url = str(request.base_url).rstrip("/")
 
         image_url = (
             f"{base_url}"
@@ -130,10 +115,7 @@ async def upload_campaign_image(
             f"{filename}"
         )
 
-        print(
-            f"Campaign image uploaded: "
-            f"{image_url}"
-        )
+        print(f"Campaign image uploaded: {image_url}")
 
         # ----------------------------------------------------
         # Return result
@@ -141,9 +123,7 @@ async def upload_campaign_image(
 
         return {
             "success": True,
-            "message": (
-                "Image uploaded successfully"
-            ),
+            "message": "Image uploaded successfully",
             "url": image_url,
             "filename": filename,
         }
@@ -153,10 +133,7 @@ async def upload_campaign_image(
 
     except Exception as e:
 
-        print(
-            "Image upload error:",
-            e,
-        )
+        print("Image upload error:", e)
 
         raise HTTPException(
             status_code=500,
@@ -194,10 +171,7 @@ def create_email_campaign(
 
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    "At least one contact "
-                    "must be selected"
-                ),
+                detail="At least one contact must be selected",
             )
 
         # ----------------------------------------------------
@@ -212,15 +186,9 @@ def create_email_campaign(
             )
 
         try:
+            user_id = UUID(str(payload.user_id))
 
-            user_id = UUID(
-                str(payload.user_id)
-            )
-
-        except (
-            ValueError,
-            TypeError,
-        ):
+        except (ValueError, TypeError):
 
             raise HTTPException(
                 status_code=400,
@@ -228,28 +196,22 @@ def create_email_campaign(
             )
 
         # ----------------------------------------------------
-        # Convert contact IDs to UUIDs
+        # Convert contact IDs to UUIDs (de-duplicated, order kept)
         # ----------------------------------------------------
 
         try:
+            contact_ids = list(
+                dict.fromkeys(
+                    UUID(str(contact_id))
+                    for contact_id in payload.contact_ids
+                )
+            )
 
-            contact_ids = [
-                UUID(str(contact_id))
-                for contact_id
-                in payload.contact_ids
-            ]
-
-        except (
-            ValueError,
-            TypeError,
-        ):
+        except (ValueError, TypeError):
 
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    "One or more contact IDs "
-                    "are invalid"
-                ),
+                detail="One or more contact IDs are invalid",
             )
 
         # ----------------------------------------------------
@@ -269,9 +231,7 @@ def create_email_campaign(
         # Security / ownership check
         # ----------------------------------------------------
 
-        if len(contacts) != len(
-            contact_ids
-        ):
+        if len(contacts) != len(contact_ids):
 
             raise HTTPException(
                 status_code=403,
@@ -285,15 +245,15 @@ def create_email_campaign(
         # Create campaign
         # ----------------------------------------------------
 
-        campaign = EmailCampaign(
+        campaign = Email_campaign(
 
             user_id=user_id,
 
             name=payload.name,
 
-            campaign_type=(
-                payload.campaign_type
-            ),
+            company_name=payload.company_name,
+
+            campaign_type=payload.campaign_type,
 
             subject=payload.subject,
 
@@ -301,15 +261,9 @@ def create_email_campaign(
 
             signature=payload.signature,
 
-            # Uploaded header image URL
-            header_image_url=(
-                payload.header_image_url
-            ),
+            header_image_url=payload.header_image_url,
 
-            # Uploaded footer image URL
-            footer_image_url=(
-                payload.footer_image_url
-            ),
+            footer_image_url=payload.footer_image_url,
 
             status=payload.status,
 
@@ -317,20 +271,15 @@ def create_email_campaign(
 
             timezone=payload.timezone,
 
-            days_before_birthday=(
-                payload.days_before_birthday
-            ),
-        )
+            days_before_birthday=payload.days_before_birthday,
 
-        # Useful for debugging
-        print(
-            "Header image:",
-            payload.header_image_url,
-        )
+            # Derived on the server, never trusted from the client
+            contacts=len(contacts),
 
-        print(
-            "Footer image:",
-            payload.footer_image_url,
+            number_of_sent_msg=0,
+
+            # Set later by the scheduler
+            next_run=None,
         )
 
         db.add(campaign)
@@ -347,14 +296,12 @@ def create_email_campaign(
 
         for contact in contacts:
 
-            campaign_contact = (
+            db.add(
                 EmailCampaignContact(
                     campaign_id=campaign.id,
                     contact_id=contact.id,
                 )
             )
-
-            db.add(campaign_contact)
 
         # ----------------------------------------------------
         # Save everything
@@ -372,39 +319,38 @@ def create_email_campaign(
 
             "success": True,
 
-            "message": (
-                "Birthday campaign "
-                "created successfully"
-            ),
+            "message": "Birthday campaign created successfully",
 
             "campaign": {
 
-                "id": str(
-                    campaign.id
-                ),
+                "id": str(campaign.id),
 
                 "name": campaign.name,
 
+                "company_name": campaign.company_name,
+
                 "status": campaign.status,
 
-                "campaign_type": (
-                    campaign.campaign_type
+                "campaign_type": campaign.campaign_type,
+
+                "contacts": campaign.contacts,
+
+                "number_of_sent_msg": campaign.number_of_sent_msg,
+
+                "next_run": (
+                    campaign.next_run.isoformat()
+                    if campaign.next_run
+                    else None
                 ),
 
-                "contacts_count": len(
-                    contacts
-                ),
+                "header_image_url": campaign.header_image_url,
 
-                "header_image_url": (
-                    campaign.header_image_url
-                ),
-
-                "footer_image_url": (
-                    campaign.footer_image_url
-                ),
+                "footer_image_url": campaign.footer_image_url,
 
                 "created_at": (
-                    campaign.created_at
+                    campaign.created_at.isoformat()
+                    if campaign.created_at
+                    else None
                 ),
             },
         }
@@ -414,6 +360,7 @@ def create_email_campaign(
     # --------------------------------------------------------
 
     except HTTPException:
+        db.rollback()
         raise
 
     # --------------------------------------------------------
@@ -424,15 +371,244 @@ def create_email_campaign(
 
         db.rollback()
 
-        print(
-            "Creating email campaign failed:",
-            e,
-        )
+        print("Creating email campaign failed:", e)
 
         raise HTTPException(
             status_code=500,
-            detail=(
-                "Failed to create email campaign: "
-                f"{str(e)}"
+            detail=f"Failed to create email campaign: {str(e)}",
+        )
+
+
+# ============================================================
+# GET ONE CAMPAIGN (used to prefill the edit form)
+# ============================================================
+
+@router.get("/{campaign_id}")
+def get_email_campaign(
+    campaign_id: str,
+    user_id: str,
+    db: Session = Depends(get_db),
+):
+    try:
+        campaign_uuid = UUID(campaign_id)
+        user_uuid = UUID(user_id)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=400, detail="Invalid campaign or user ID")
+
+    campaign = (
+        db.query(Email_campaign)
+        .filter(
+            Email_campaign.id == campaign_uuid,
+            Email_campaign.user_id == user_uuid,
+        )
+        .first()
+    )
+
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    links = (
+        db.query(EmailCampaignContact)
+        .filter(EmailCampaignContact.campaign_id == campaign.id)
+        .all()
+    )
+
+    return {
+        "success": True,
+        "campaign": {
+            "id": str(campaign.id),
+            "name": campaign.name,
+            "company_name": campaign.company_name,
+            "campaign_type": campaign.campaign_type,
+            "subject": campaign.subject,
+            "content": campaign.content,
+            "signature": campaign.signature,
+            "header_image_url": campaign.header_image_url,
+            "footer_image_url": campaign.footer_image_url,
+            "status": campaign.status,
+            "send_time": (
+                campaign.send_time.strftime("%H:%M")
+                if campaign.send_time
+                else None
             ),
+            "timezone": campaign.timezone,
+            "days_before_birthday": campaign.days_before_birthday,
+            "contact_ids": [str(link.contact_id) for link in links],
+        },
+    }
+
+
+# ============================================================
+# UPDATE EMAIL CAMPAIGN
+# ============================================================
+
+@router.put("/{campaign_id}")
+def update_email_campaign(
+    campaign_id: str,
+    payload: CreateEmailCampaignRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        if payload.campaign_type != "birthday":
+            raise HTTPException(status_code=400, detail="Invalid campaign type")
+
+        try:
+            campaign_uuid = UUID(campaign_id)
+            user_id = UUID(str(payload.user_id))
+            contact_ids = list(
+                dict.fromkeys(
+                    UUID(str(contact_id)) for contact_id in payload.contact_ids
+                )
+            )
+        except (ValueError, TypeError):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid campaign, user or contact ID",
+            )
+
+        # Only the owner can edit
+        campaign = (
+            db.query(Email_campaign)
+            .filter(
+                Email_campaign.id == campaign_uuid,
+                Email_campaign.user_id == user_id,
+            )
+            .first()
+        )
+
+        if not campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+
+        contacts = (
+            db.query(Contact)
+            .filter(
+                Contact.id.in_(contact_ids),
+                Contact.user_id == user_id,
+            )
+            .all()
+        )
+
+        if len(contacts) != len(contact_ids):
+            raise HTTPException(
+                status_code=403,
+                detail="One or more contacts do not belong to this user",
+            )
+
+        # Update the campaign fields
+        campaign.name = payload.name
+        campaign.company_name = payload.company_name
+        campaign.campaign_type = payload.campaign_type
+        campaign.subject = payload.subject
+        campaign.content = payload.content
+        campaign.signature = payload.signature
+        campaign.header_image_url = payload.header_image_url
+        campaign.footer_image_url = payload.footer_image_url
+        campaign.status = payload.status
+        campaign.send_time = payload.send_time
+        campaign.timezone = payload.timezone
+        campaign.days_before_birthday = payload.days_before_birthday
+        campaign.contacts = len(contacts)
+
+        # number_of_sent_msg is NOT touched: sending history is preserved
+        if payload.status == "draft":
+            campaign.next_run = None
+
+        # Replace the contact selection
+        (
+            db.query(EmailCampaignContact)
+            .filter(EmailCampaignContact.campaign_id == campaign.id)
+            .delete(synchronize_session=False)
+        )
+
+        for contact in contacts:
+            db.add(
+                EmailCampaignContact(
+                    campaign_id=campaign.id,
+                    contact_id=contact.id,
+                )
+            )
+
+        db.commit()
+        db.refresh(campaign)
+
+        return {
+            "success": True,
+            "message": "Campaign updated successfully",
+            "campaign": {
+                "id": str(campaign.id),
+                "name": campaign.name,
+                "status": campaign.status,
+                "contacts": campaign.contacts,
+            },
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+
+    except Exception as e:
+        db.rollback()
+        print("Updating email campaign failed:", e)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update email campaign: {str(e)}",
+        )
+
+
+# ============================================================
+# DELETE EMAIL CAMPAIGN
+# ============================================================
+
+@router.delete("/{campaign_id}")
+def delete_email_campaign(
+    campaign_id: str,
+    user_id: str,
+    db: Session = Depends(get_db),
+):
+    try:
+        campaign_uuid = UUID(campaign_id)
+        user_uuid = UUID(user_id)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=400, detail="Invalid campaign or user ID")
+
+    try:
+        # Only the owner can delete
+        campaign = (
+            db.query(Email_campaign)
+            .filter(
+                Email_campaign.id == campaign_uuid,
+                Email_campaign.user_id == user_uuid,
+            )
+            .first()
+        )
+
+        if not campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+
+        # Remove the contact links first, in case the FK has no ON DELETE CASCADE
+        (
+            db.query(EmailCampaignContact)
+            .filter(EmailCampaignContact.campaign_id == campaign.id)
+            .delete(synchronize_session=False)
+        )
+
+        db.delete(campaign)
+        db.commit()
+
+        return {
+            "success": True,
+            "message": "Campaign deleted successfully",
+            "id": campaign_id,
+        }
+
+    except HTTPException:
+        db.rollback()
+        raise
+
+    except Exception as e:
+        db.rollback()
+        print("Deleting email campaign failed:", e)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete email campaign: {str(e)}",
         )

@@ -11,6 +11,7 @@ from app.api import auth_route
 from app.api import addcontact
 from app.api import usercontacts
 from app.api import email_campaign
+from app.api import user_campaigns
 
 
 # Create the upload directory if it does not exist
@@ -69,3 +70,4 @@ app.include_router(auth_route.router)
 app.include_router(addcontact.router)
 app.include_router(usercontacts.router)
 app.include_router(email_campaign.router)
+app.include_router(user_campaigns.router)
