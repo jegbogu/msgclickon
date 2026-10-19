@@ -1,11 +1,12 @@
 import uuid
+
 from sqlalchemy import (
     Column,
     String,
     Text,
+    DateTime,
     Time,
     Integer,
-    DateTime,
     ForeignKey,
 )
 from sqlalchemy.dialects.postgresql import UUID
@@ -14,7 +15,7 @@ from sqlalchemy.sql import func
 from app.core.db import Base
 
 
-class EmailCampaign(Base):
+class Email_campaign(Base):
     __tablename__ = "email_campaign"
 
     id = Column(
@@ -32,6 +33,11 @@ class EmailCampaign(Base):
     name = Column(
         String(255),
         nullable=False,
+    )
+
+    company_name = Column(
+        String(255),
+        nullable=True,
     )
 
     campaign_type = Column(
@@ -86,6 +92,28 @@ class EmailCampaign(Base):
         Integer,
         nullable=False,
         default=0,
+    )
+
+    # Number of contacts attached to this campaign
+    contacts = Column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+
+    # Total messages sent so far by this campaign
+    number_of_sent_msg = Column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+
+    # Next scheduled send; NULL for drafts and paused campaigns
+    next_run = Column(
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     created_at = Column(

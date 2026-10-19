@@ -22,7 +22,7 @@ FastAPI Backend
       ├── Redis Queue
       │
       ▼
-Go Agent
+Python Agent
       │
       ▼
 Email / WhatsApp / SMS APIs

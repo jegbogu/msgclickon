@@ -110,13 +110,20 @@ type EmailTemplateBuilderProps = {
   templateContent: string;
 
   templateId: TemplateId;
+  initialCampaignName?: string;
   initialCompanyName?: string;
   initialSubject?: string;
   initialSendTime?: string;
   initialTimezone?: string;
+  initialSignature?: string;
+  initialHeaderImageUrl?: string | null;
+  initialFooterImageUrl?: string | null;
+  initialElements?: EditorElement[];
 
   onNext: (data: {
     templateId: TemplateId;
+    campaignName: string;
+    bodyText: string;
     content: string;
     companyName: string;
     subject: string;
@@ -132,13 +139,20 @@ type EmailTemplateBuilderProps = {
 export default function EmailTemplateBuilder({
   templateContent,
   templateId,
+  initialCampaignName = "",
   initialCompanyName = "",
   initialSubject = "",
   initialSendTime = "08:00",
   initialTimezone = "Africa/Johannesburg",
+  initialSignature = "",
+  initialHeaderImageUrl = null,
+  initialFooterImageUrl = null,
+  initialElements,
   onNext,
 }: EmailTemplateBuilderProps) {
   const [content, setContent] = useState(templateContent);
+
+  const [campaignName, setCampaignName] = useState(initialCampaignName);
 
   const [companyName, setCompanyName] = useState(initialCompanyName);
 
@@ -190,22 +204,28 @@ export default function EmailTemplateBuilder({
 
   useEffect(() => {
     setContent(templateContent);
+    setCampaignName(initialCampaignName);
     setCompanyName(initialCompanyName);
     setSubject(initialSubject);
     setSendTime(initialSendTime);
     setTimezone(initialTimezone);
-    setElements([]);
-    setSignature("");
-    setHeaderImage(null);
-    setFooterImage(null);
+    setElements(initialElements ?? []);
+    setSignature(initialSignature);
+    setHeaderImage(initialHeaderImageUrl);
+    setFooterImage(initialFooterImageUrl);
     setActiveImageElementId(null);
   }, [
     templateContent,
     templateId,
+    initialCampaignName,
     initialCompanyName,
     initialSubject,
     initialSendTime,
     initialTimezone,
+    initialSignature,
+    initialHeaderImageUrl,
+    initialFooterImageUrl,
+    initialElements,
   ]);
 
   useEffect(() => {
@@ -697,6 +717,11 @@ export default function EmailTemplateBuilder({
   // ============================================================
 
   const handleNext = () => {
+    if (!campaignName.trim()) {
+      alert("Please enter a campaign name.");
+      return;
+    }
+
     if (!companyName.trim()) {
       alert(
         "Please enter your company or organization name.",
@@ -728,6 +753,11 @@ export default function EmailTemplateBuilder({
 
     onNext({
       templateId,
+
+      campaignName:
+        campaignName.trim(),
+
+      bodyText: content,
 
       content: emailContent,
 
@@ -1219,6 +1249,31 @@ export default function EmailTemplateBuilder({
           <p className="mt-1 text-sm text-gray-500">
             Enter the information that will be used for this birthday email campaign.
           </p>
+        </div>
+
+        {/* CAMPAIGN NAME */}
+
+        <div className="mb-5">
+          <label
+            htmlFor="campaignName"
+            className="mb-2 block text-sm font-medium text-gray-700"
+          >
+            Campaign name
+          </label>
+
+          <input
+            id="campaignName"
+            type="text"
+            value={campaignName}
+            onChange={(e) =>
+              setCampaignName(
+                e.target.value,
+              )
+            }
+            placeholder="e.g. Staff birthday wishes"
+            maxLength={100}
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">

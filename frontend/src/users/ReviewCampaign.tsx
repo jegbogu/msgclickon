@@ -8,13 +8,17 @@ const API_URL = "http://localhost:8000";
 
 type ReviewCampaignProps = {
   campaign: CampaignForm;
+  // When set, the campaign is updated (PUT) instead of created (POST)
+  editId?: string;
   onBack: () => void;
 };
 
 export default function ReviewCampaign({
   campaign,
+  editId,
   onBack,
 }: ReviewCampaignProps) {
+  const isEdit = Boolean(editId);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -23,11 +27,26 @@ export default function ReviewCampaign({
     "draft" | "campaign" | null
   >(null);
 
+  const handleCancel = () => {
+    if (
+      window.confirm(
+        "Cancel this campaign? Your changes won't be saved.",
+      )
+    ) {
+      navigate("/campaigns");
+    }
+  };
+
   const handleSave = async (
     mode: "draft" | "campaign",
   ) => {
     if (!user?.id) {
       alert("User information is missing.");
+      return;
+    }
+
+    if (!campaign.campaign.name?.trim()) {
+      alert("Please enter a campaign name.");
       return;
     }
 
@@ -67,8 +86,8 @@ export default function ReviewCampaign({
       const payload = {
         user_id: user.id,
 
-        // Campaign name
-        name: campaign.campaign.name,
+        // Campaign name typed by the user
+        name: campaign.campaign.name.trim(),
 
         // Company / organization entered in EmailTemplateBuilder
         company_name:
@@ -111,9 +130,11 @@ export default function ReviewCampaign({
       console.log("Campaign payload:", payload);
 
       const response = await fetch(
-        `${API_URL}/api/v1/user/email-campaigns`,
+        isEdit
+          ? `${API_URL}/api/v1/user/email-campaigns/${editId}`
+          : `${API_URL}/api/v1/user/email-campaigns`,
         {
-          method: "POST",
+          method: isEdit ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -132,9 +153,11 @@ export default function ReviewCampaign({
       }
 
       alert(
-        mode === "draft"
-          ? "Campaign draft saved successfully!"
-          : "Campaign saved successfully!",
+        isEdit
+          ? "Campaign updated successfully!"
+          : mode === "draft"
+            ? "Campaign draft saved successfully!"
+            : "Campaign saved successfully!",
       );
 
       navigate("/campaigns");
@@ -177,8 +200,8 @@ export default function ReviewCampaign({
         <div className="space-y-3 text-sm">
           <p>
             <strong>Campaign Name:</strong>{" "}
-            {campaign.campaign.name ||
-              "Birthday Campaign"}
+            {campaign.campaign.name?.trim() ||
+              "No campaign name entered"}
           </p>
 
           <p>
@@ -204,8 +227,6 @@ export default function ReviewCampaign({
             {campaign.campaign.timezone ||
               "No timezone selected"}
           </p>
-
-           
         </div>
       </div>
 
@@ -289,6 +310,16 @@ export default function ReviewCampaign({
         </button>
 
         <div className="flex flex-wrap gap-3">
+          {/* Cancel */}
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={saving}
+            className="rounded-md px-6 py-3 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+
           {/* Save Draft */}
           <button
             type="button"
